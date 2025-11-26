@@ -1,0 +1,241 @@
+openapi: 3.1.0
+info:
+  description: |-
+    This is a e-commerce API based on the OpenAPI 3.1 specification.  You can find out more about
+
+    Use API key `apitest`
+
+    Some useful links:
+    - [Repository](https://github.com/oolio-group/front-end-cart)
+  title: Order Food Online - OpenAPI 3.1
+  version: 1.0.0
+externalDocs:
+  description: Find out more about the challenge
+  url: http://swagger.io
+servers:
+- url: https://orderfoodonline.deno.dev/api
+tags:
+- description: Everything about products
+  name: product
+- description: Place Orderso
+  name: order
+paths:
+  /product:
+    get:
+      description: Get all products available for order
+      operationId: listProducts
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Product"
+                type: array
+          description: successful operation
+      summary: List products
+      tags:
+      - product
+  /product/{productId}:
+    get:
+      description: Returns a single product
+      operationId: getProduct
+      parameters:
+      - description: ID of product to return
+        explode: false
+        in: path
+        name: productId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+          description: successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Product not found
+      summary: Find product by ID
+      tags:
+      - product
+  /order:
+    post:
+      description: Place a new order in the store
+      operationId: placeOrder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderReq"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+          description: successful operation
+        "400":
+          description: Invalid input
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "422":
+          description: Validation exception
+      security:
+      - api_key:
+        - create_order
+      summary: Place an order
+      tags:
+      - order
+components:
+  schemas:
+    Order:
+      example:
+        total: 0.8008281904610115
+        discounts: 6.027456183070403
+        id: id
+        items:
+        - quantity: 1
+          productId: productId
+        - quantity: 1
+          productId: productId
+        products:
+        - image:
+            tablet: tablet
+            thumbnail: thumbnail
+            desktop: desktop
+            mobile: mobile
+          price: 0.8008282
+          name: name
+          id: id
+          category: category
+        - image:
+            tablet: tablet
+            thumbnail: thumbnail
+            desktop: desktop
+            mobile: mobile
+          price: 0.8008282
+          name: name
+          id: id
+          category: category
+      properties:
+        id:
+          type: string
+        total:
+          type: number
+        discounts:
+          type: number
+        items:
+          items:
+            $ref: "#/components/schemas/Order_items_inner"
+          type: array
+        products:
+          items:
+            $ref: "#/components/schemas/Product"
+          type: array
+    OrderReq:
+      description: Place a new order
+      example:
+        couponCode: couponCode
+        items:
+        - quantity: 0
+          productId: productId
+        - quantity: 0
+          productId: productId
+      properties:
+        couponCode:
+          description: Optional promo code applied to the order
+          type: string
+        items:
+          items:
+            $ref: "#/components/schemas/OrderReq_items_inner"
+          type: array
+      required:
+      - items
+    Product:
+      example:
+        image:
+          tablet: tablet
+          thumbnail: thumbnail
+          desktop: desktop
+          mobile: mobile
+        price: 0.8008282
+        name: name
+        id: id
+        category: category
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          description: Selling price
+          format: float
+          type: number
+        category:
+          type: string
+        image:
+          $ref: "#/components/schemas/Product_image"
+    ApiResponse:
+      properties:
+        code:
+          format: int32
+          type: integer
+        type:
+          type: string
+        message:
+          type: string
+      xml:
+        name: "##default"
+    Order_items_inner:
+      example:
+        quantity: 1
+        productId: productId
+      properties:
+        productId:
+          description: ID of the product
+          type: string
+        quantity:
+          description: Item count
+          type: integer
+    OrderReq_items_inner:
+      example:
+        quantity: 0
+        productId: productId
+      properties:
+        productId:
+          description: ID of the product (required)
+          type: string
+        quantity:
+          description: Item count (required)
+          type: integer
+      required:
+      - productId
+      - quantity
+    Product_image:
+      example:
+        tablet: tablet
+        thumbnail: thumbnail
+        desktop: desktop
+        mobile: mobile
+      properties:
+        thumbnail:
+          type: string
+        mobile:
+          type: string
+        tablet:
+          type: string
+        desktop:
+          type: string
+  securitySchemes:
+    api_key:
+      in: header
+      name: api_key
+      type: apiKey
