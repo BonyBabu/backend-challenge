@@ -19,68 +19,50 @@ import (
 type OrderAPIService struct {
 	orderDao   db.OrderDao
 	productDao db.ProductDao
-	files      []string
+	couponDao  db.CouponDao
 }
 
-func CouponExist(filePath string, numberOfThreads int64, coupon string, stopAllchecks <-chan bool) (*atomic.Bool, *sync.WaitGroup, error) {
-	stopProducers := make(chan bool, 1)
+func SearchForCoupon(filePath string, numberOfThreads int64, coupon string, stopAllchecks <-chan bool) (*atomic.Bool, *sync.WaitGroup, error) {
+	var stopProducers atomic.Bool
+	stopProducers.Store(false)
 	go func() {
 		val, ok := <-stopAllchecks
 		if ok {
-			stopProducers <- val
+			stopProducers.Store(val)
 		}
 	}()
 	couponQueue := make(chan string, numberOfThreads*100)
-	wgProducers, err := utils.ReadFile(filePath, numberOfThreads, couponQueue, stopProducers)
+	wgProducers, err := utils.ReadFile(filePath, numberOfThreads, couponQueue, &stopProducers)
 	if err != nil {
 		return nil, nil, err
 	}
 	go func() {
 		wgProducers.Wait() // Wait for all sender goroutines to finish
 		close(couponQueue) // Close the channel
-		log.Printf("Not Found %s in %s", coupon, filePath)
+		log.Printf("Stop processing file %s", filePath)
 	}()
-	atomicBool, wgRecivers := utils.ScanForCoupon(numberOfThreads, couponQueue, coupon, filePath, stopProducers)
+	atomicBool, wgRecivers := utils.ScanForCoupon(numberOfThreads, couponQueue, coupon, filePath, &stopProducers)
 	return atomicBool, wgRecivers, nil
 }
 
 // NewOrderAPIService creates a default api service
-func NewOrderAPIService(orderDao db.OrderDao, productDao db.ProductDao, files []string) *OrderAPIService {
+func NewOrderAPIService(orderDao db.OrderDao, productDao db.ProductDao, files []string, couponMin int) *OrderAPIService {
 	return &OrderAPIService{
 		orderDao:   orderDao,
 		productDao: productDao,
-		files:      files,
+		couponDao:  db.NewCouponDao(files, couponMin),
 	}
 }
 
 // PlaceOrder - Place an order
 func (s *OrderAPIService) PlaceOrder(ctx context.Context, orderReq openapi.OrderReq) (openapi.ImplResponse, error) {
-	counter := 0
-	stopAllchecks := make(chan bool, 1)
-	if len(orderReq.CouponCode) >= 8 && len(orderReq.CouponCode) <= 10 {
-		results := map[*sync.WaitGroup]*atomic.Bool{}
-		for _, file := range s.files {
-			flag, wg, err := CouponExist(file, 10, orderReq.CouponCode, stopAllchecks)
-			if err != nil {
-				log.Fatal(err)
-			}
-			results[wg] = flag
-		}
-		for wg, result := range results {
-			wg.Wait()
-			if result.Load() {
-				counter = counter + 1
-			}
-			if counter == 2 {
-				stopAllchecks <- true
-				break
-			}
-		}
-		if counter < 2 {
-			return openapi.Response(http.StatusUnprocessableEntity, "invalid coupon code"), nil
-		}
-	} else {
+	if len(orderReq.CouponCode) < 8 && len(orderReq.CouponCode) > 10 {
 		return openapi.Response(http.StatusUnprocessableEntity, "invalid coupon code"), nil
+	}
+
+	searchResult, err := s.couponDao.SearchForCouponInGivenFiles(orderReq)
+	if err != nil {
+		return openapi.ImplResponse{}, nil
 	}
 
 	id := uuid.New().String()
@@ -106,7 +88,13 @@ func (s *OrderAPIService) PlaceOrder(ctx context.Context, orderReq openapi.Order
 		products = append(products, openapiProduct)
 	}
 
-	s.orderDao.CreateOrder(ctx, db.Order{
+	if result, err := searchResult.Validate(); err != nil {
+		return openapi.ImplResponse{}, err
+	} else if !result {
+		return openapi.Response(http.StatusUnprocessableEntity, "invalid coupon code"), nil
+	}
+
+	if err = s.orderDao.CreateOrder(ctx, db.Order{
 		ID: id,
 		Items: func() []db.Item {
 			var dbItems []db.Item
@@ -118,7 +106,9 @@ func (s *OrderAPIService) PlaceOrder(ctx context.Context, orderReq openapi.Order
 			}
 			return dbItems
 		}(),
-	})
+	}); err != nil {
+		return openapi.ImplResponse{}, err
+	}
 
 	return openapi.Response(http.StatusOK, openapi.Order{
 		Id:       id,

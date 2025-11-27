@@ -10,3 +10,7 @@ generate: internal/generated/
 
 clean:
 	rm -rf internal/generated/
+
+.PHONY: run
+run: generate
+	go run cmd/foodorder/main.go	

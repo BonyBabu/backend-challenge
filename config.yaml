@@ -1,0 +1,6 @@
+db: db.sqlite3
+couponBase:
+  - couponbase/couponbase1
+  - couponbase/couponbase2
+  - couponbase/couponbase3
+couponMin: 2  

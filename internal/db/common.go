@@ -1,6 +1,7 @@
 package db
 
 import (
+	"backend-challenge/internal/generated/openapi"
 	"context"
 )
 
@@ -32,4 +33,12 @@ type ProductDao interface {
 	// Define Product DAO methods here.
 	GetProduct(context.Context, ID) (Product, error)
 	GetAllProducts(context.Context) ([]Product, error)
+}
+
+type SearchResult interface {
+	Validate() (bool, error)
+}
+
+type CouponDao interface {
+	SearchForCouponInGivenFiles(openapi.OrderReq) (SearchResult, error)
 }

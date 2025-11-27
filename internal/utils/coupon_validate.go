@@ -11,7 +11,7 @@ import (
 
 // type Set = *ConcurrentMap[string, any]
 
-func ReadFile(filePath string, numberOfThreads int64, couponQueue chan<- string, stopReading <-chan bool) (*sync.WaitGroup, error) {
+func ReadFile(filePath string, numberOfThreads int64, couponQueue chan<- string, stopReading *atomic.Bool) (*sync.WaitGroup, error) {
 	chunks, err := SplitFileToNchunks(filePath, int(numberOfThreads))
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func ReadFile(filePath string, numberOfThreads int64, couponQueue chan<- string,
 	return &wg, nil
 }
 
-func ReadFileChunk(filePath string, from int64, to int64, couponQueue chan<- string, wg *sync.WaitGroup, stopReading <-chan bool) error {
+func ReadFileChunk(filePath string, from int64, to int64, couponQueue chan<- string, wg *sync.WaitGroup, stopReading *atomic.Bool) error {
 	defer wg.Done()
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -39,17 +39,8 @@ func ReadFileChunk(filePath string, from int64, to int64, couponQueue chan<- str
 		return err
 	}
 	scanner := bufio.NewScanner(bytes.NewReader(buf))
-	var stop atomic.Bool
-	stop.Store(false)
-	go func() {
-		val, ok := <-stopReading
-		if ok {
-			stop.Store(val)
-		}
-	}()
-
 	for scanner.Scan() {
-		if stop.Load() {
+		if stopReading.Load() {
 			break
 		}
 		line := scanner.Text()
@@ -102,7 +93,7 @@ func SplitFileToNchunks(filePath string, n int) ([][]int64, error) {
 	return chunks, nil
 }
 
-func ScanForCoupon(numberOfThreads int64, couponQueue <-chan string, expectedCoupon string, file string, stopProducers chan<- bool) (*atomic.Bool, *sync.WaitGroup) {
+func ScanForCoupon(numberOfThreads int64, couponQueue <-chan string, expectedCoupon string, file string, stopProducers *atomic.Bool) (*atomic.Bool, *sync.WaitGroup) {
 	var wgRecivers sync.WaitGroup
 	var flag atomic.Bool
 	for i := 0; i < int(numberOfThreads); i++ {
@@ -110,13 +101,10 @@ func ScanForCoupon(numberOfThreads int64, couponQueue <-chan string, expectedCou
 		go func() {
 			defer wgRecivers.Done()
 			for coupon := range couponQueue {
-				if flag.Load() {
-					stopProducers <- true
-					return
-				}
 				if coupon == expectedCoupon {
-					defer log.Println("Found", expectedCoupon, "in", file)
 					flag.Store(true)
+					log.Println("Found", expectedCoupon, "in", file)
+					break
 				}
 			}
 		}()

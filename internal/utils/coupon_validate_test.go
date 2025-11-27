@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path"
 	"runtime"
+	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -79,7 +80,7 @@ func TestReadFile(t *testing.T) {
 			testCoupons := path.Join(path.Dir(filename), tt.filePath)
 			coupons := map[string]any{}
 			couponQueue := make(chan string, 1)
-			wg, error := utils.ReadFile(testCoupons, tt.numberOfThreads, couponQueue)
+			wg, error := utils.ReadFile(testCoupons, tt.numberOfThreads, couponQueue, &atomic.Bool{})
 			assert.Equal(t, error, nil)
 			go func() {
 				wg.Wait()          // Wait for all sender goroutines to finish
