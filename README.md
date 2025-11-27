@@ -1,3 +1,12 @@
+# How to Run
+Update the path of the uncompressed couponbase files in the [config.yaml](config.yaml)
+```bash
+make run
+``` 
+## Test
+```bash
+make test
+``` 
 # Advanced Challenge
 
 Build an API server implementing our OpenAPI spec for food ordering API in [Go](https://go.dev).\
