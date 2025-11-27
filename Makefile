@@ -15,5 +15,6 @@ clean:
 run: generate
 	go run cmd/foodorder/main.go
 
+.PHONY: test
 test:
-	go test ./...		
+	go generate ./... && go test ./...		

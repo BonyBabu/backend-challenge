@@ -1,4 +1,7 @@
+//go:generate go run github.com/golang/mock/mockgen@v1.6.0 -destination=mocks/mock_db.go -package=mocks backend-challenge/internal/db OrderDao,ProductDao,CouponDao,SearchResult
 package db
+
+// NOTE: To regenerate mocks, run `go generate ./...` or `go generate` from this package.
 
 import (
 	"backend-challenge/internal/generated/openapi"

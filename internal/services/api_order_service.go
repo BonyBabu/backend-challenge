@@ -55,6 +55,16 @@ func NewOrderAPIService(orderDao db.OrderDao, productDao db.ProductDao, files []
 	}
 }
 
+// NewOrderAPIServiceWithCouponDao creates a default api service by injecting couponDao directly.
+// This constructor is useful for unit tests where a couponDao mock can be provided.
+func NewOrderAPIServiceWithCouponDao(orderDao db.OrderDao, productDao db.ProductDao, couponDao db.CouponDao) *OrderAPIService {
+	return &OrderAPIService{
+		orderDao:   orderDao,
+		productDao: productDao,
+		couponDao:  couponDao,
+	}
+}
+
 // PlaceOrder - Place an order
 func (s *OrderAPIService) PlaceOrder(ctx context.Context, orderReq openapi.OrderReq) (res openapi.ImplResponse, err error) {
 	defer func() {
@@ -65,7 +75,7 @@ func (s *OrderAPIService) PlaceOrder(ctx context.Context, orderReq openapi.Order
 		}
 	}()
 
-	if len(orderReq.CouponCode) < 8 && len(orderReq.CouponCode) > 10 {
+	if len(orderReq.CouponCode) < 8 || len(orderReq.CouponCode) > 10 {
 		return openapi.Response(http.StatusUnprocessableEntity, "invalid coupon code"), nil
 	}
 
