@@ -3,6 +3,7 @@ package db
 import (
 	"backend-challenge/internal/generated/openapi"
 	"backend-challenge/internal/utils"
+	"context"
 	"errors"
 	"log"
 	"sync"
@@ -80,8 +81,16 @@ func searchForCoupon(filePath string, numberOfThreads int64, coupon string, stop
 }
 
 // SearchForCouponInGivenFiles implements CouponDao.
-func (c *couponDaoImpl) SearchForCouponInGivenFiles(orderReq openapi.OrderReq) (SearchResult, error) {
+func (c *couponDaoImpl) SearchForCouponInGivenFiles(ctx context.Context, orderReq openapi.OrderReq) (SearchResult, error) {
 	stopAllchecks := make(chan bool, 1)
+	// kill all threads if context is canccelled
+	go func() {
+		result := ctx.Done()
+		if result != nil {
+			<-result
+			stopAllchecks <- true
+		}
+	}()
 	var results []*atomic.Bool
 	var fileProcessors []*sync.WaitGroup
 	for _, file := range c.files {

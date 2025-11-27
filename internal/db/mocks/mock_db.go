@@ -127,18 +127,18 @@ func (m *MockCouponDao) EXPECT() *MockCouponDaoMockRecorder {
 }
 
 // SearchForCouponInGivenFiles mocks base method.
-func (m *MockCouponDao) SearchForCouponInGivenFiles(arg0 openapi.OrderReq) (db.SearchResult, error) {
+func (m *MockCouponDao) SearchForCouponInGivenFiles(arg0 context.Context, arg1 openapi.OrderReq) (db.SearchResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchForCouponInGivenFiles", arg0)
+	ret := m.ctrl.Call(m, "SearchForCouponInGivenFiles", arg0, arg1)
 	ret0, _ := ret[0].(db.SearchResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SearchForCouponInGivenFiles indicates an expected call of SearchForCouponInGivenFiles.
-func (mr *MockCouponDaoMockRecorder) SearchForCouponInGivenFiles(arg0 interface{}) *gomock.Call {
+func (mr *MockCouponDaoMockRecorder) SearchForCouponInGivenFiles(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchForCouponInGivenFiles", reflect.TypeOf((*MockCouponDao)(nil).SearchForCouponInGivenFiles), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchForCouponInGivenFiles", reflect.TypeOf((*MockCouponDao)(nil).SearchForCouponInGivenFiles), arg0, arg1)
 }
 
 // MockSearchResult is a mock of SearchResult interface.

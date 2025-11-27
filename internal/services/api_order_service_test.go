@@ -20,7 +20,7 @@ type testCouponDao struct {
 	found bool
 }
 
-func (t *testCouponDao) SearchForCouponInGivenFiles(orderReq openapi.OrderReq) (db.SearchResult, error) {
+func (t *testCouponDao) SearchForCouponInGivenFiles(ctx context.Context, orderReq openapi.OrderReq) (db.SearchResult, error) {
 	return &testSearchResult{found: t.found}, nil
 }
 

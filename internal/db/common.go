@@ -51,5 +51,5 @@ type SearchResult interface {
 // CouponDao encapsulates searching for promo codes in configured files.
 // The SearchForCouponInGivenFiles returns a SearchResult for async validation.
 type CouponDao interface {
-	SearchForCouponInGivenFiles(openapi.OrderReq) (SearchResult, error)
+	SearchForCouponInGivenFiles(context.Context, openapi.OrderReq) (SearchResult, error)
 }

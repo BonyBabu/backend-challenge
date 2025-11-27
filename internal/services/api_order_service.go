@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -67,6 +68,8 @@ func NewOrderAPIServiceWithCouponDao(orderDao db.OrderDao, productDao db.Product
 
 // PlaceOrder - Place an order
 func (s *OrderAPIService) PlaceOrder(ctx context.Context, orderReq openapi.OrderReq) (res openapi.ImplResponse, err error) {
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("thread is recovered")
@@ -79,7 +82,7 @@ func (s *OrderAPIService) PlaceOrder(ctx context.Context, orderReq openapi.Order
 		return openapi.Response(http.StatusUnprocessableEntity, "invalid coupon code"), nil
 	}
 
-	searchResult, err := s.couponDao.SearchForCouponInGivenFiles(orderReq)
+	searchResult, err := s.couponDao.SearchForCouponInGivenFiles(ctx, orderReq)
 	if err != nil {
 		return openapi.ImplResponse{}, nil
 	}
