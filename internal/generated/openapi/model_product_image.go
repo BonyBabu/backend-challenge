@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type ProductImage struct {
-
 	Thumbnail string `json:"thumbnail,omitempty"`
 
 	Mobile string `json:"mobile,omitempty"`

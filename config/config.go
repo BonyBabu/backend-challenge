@@ -24,6 +24,7 @@ func GetConfig() Config {
 	currentFileDir = filepath.ToSlash(currentFileDir)
 	configFile := filepath.Join(currentFileDir, "../config.yaml")
 	yamlFile, err := os.ReadFile(configFile)
+	log.Printf("loading configuration from %s", configFile)
 	if err != nil {
 		log.Fatalf("Error reading YAML file: %v", err)
 	}
@@ -33,7 +34,7 @@ func GetConfig() Config {
 		log.Fatalf("Error unmarshalling YAML: %v", err)
 	}
 	if len(config.CouponBase) < config.CouponMin {
-		log.Fatalf("Minimum %s couponBase file are required", config.CouponMin)
+		log.Fatalf("Minimum %d couponBase file are required", config.CouponMin)
 	}
 	for _, file := range config.CouponBase {
 		if _, err := os.Stat(file); err != nil {

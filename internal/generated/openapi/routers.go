@@ -11,15 +11,15 @@
 package openapi
 
 import (
-	"net/http"
 	"github.com/gorilla/mux"
+	"net/http"
 )
 
 // A Route defines the parameters for an api endpoint
 type Route struct {
 	Name        string
-	Method	    string
-	Pattern	    string
+	Method      string
+	Pattern     string
 	HandlerFunc http.HandlerFunc
 }
 

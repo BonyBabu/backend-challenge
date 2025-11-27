@@ -13,4 +13,7 @@ clean:
 
 .PHONY: run
 run: generate
-	go run cmd/foodorder/main.go	
+	go run cmd/foodorder/main.go
+
+test:
+	go test ./...		

@@ -5,6 +5,7 @@ import (
 	openapi "backend-challenge/internal/generated/openapi"
 	"backend-challenge/internal/utils"
 	"context"
+	"errors"
 	"log"
 	"net/http"
 	"sync"
@@ -55,7 +56,15 @@ func NewOrderAPIService(orderDao db.OrderDao, productDao db.ProductDao, files []
 }
 
 // PlaceOrder - Place an order
-func (s *OrderAPIService) PlaceOrder(ctx context.Context, orderReq openapi.OrderReq) (openapi.ImplResponse, error) {
+func (s *OrderAPIService) PlaceOrder(ctx context.Context, orderReq openapi.OrderReq) (res openapi.ImplResponse, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("thread is recovered")
+			err = errors.ErrUnsupported
+			res = openapi.ImplResponse{}
+		}
+	}()
+
 	if len(orderReq.CouponCode) < 8 && len(orderReq.CouponCode) > 10 {
 		return openapi.Response(http.StatusUnprocessableEntity, "invalid coupon code"), nil
 	}

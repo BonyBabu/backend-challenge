@@ -10,9 +10,6 @@
 
 package openapi
 
-
-
-
 type OrderItemsInner struct {
 
 	// ID of the product

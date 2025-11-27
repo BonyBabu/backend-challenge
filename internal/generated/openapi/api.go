@@ -15,37 +15,34 @@ import (
 	"net/http"
 )
 
-
-
 // OrderAPIRouter defines the required methods for binding the api requests to a responses for the OrderAPI
 // The OrderAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a OrderAPIServicer to perform the required actions, then write the service results to the http response.
-type OrderAPIRouter interface { 
+type OrderAPIRouter interface {
 	PlaceOrder(http.ResponseWriter, *http.Request)
 }
+
 // ProductAPIRouter defines the required methods for binding the api requests to a responses for the ProductAPI
 // The ProductAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a ProductAPIServicer to perform the required actions, then write the service results to the http response.
-type ProductAPIRouter interface { 
+type ProductAPIRouter interface {
 	ListProducts(http.ResponseWriter, *http.Request)
 	GetProduct(http.ResponseWriter, *http.Request)
 }
-
 
 // OrderAPIServicer defines the api actions for the OrderAPI service
 // This interface intended to stay up to date with the openapi yaml used to generate it,
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
-type OrderAPIServicer interface { 
+type OrderAPIServicer interface {
 	PlaceOrder(context.Context, OrderReq) (ImplResponse, error)
 }
-
 
 // ProductAPIServicer defines the api actions for the ProductAPI service
 // This interface intended to stay up to date with the openapi yaml used to generate it,
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
-type ProductAPIServicer interface { 
+type ProductAPIServicer interface {
 	ListProducts(context.Context) (ImplResponse, error)
 	GetProduct(context.Context, int64) (ImplResponse, error)
 }

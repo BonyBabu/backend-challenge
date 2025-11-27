@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type Order struct {
-
 	Id string `json:"id,omitempty"`
 
 	Total float32 `json:"total,omitempty"`

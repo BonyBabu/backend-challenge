@@ -10,9 +10,6 @@
 
 package openapi
 
-
-
-
 type OrderReqItemsInner struct {
 
 	// ID of the product (required)
@@ -26,7 +23,7 @@ type OrderReqItemsInner struct {
 func AssertOrderReqItemsInnerRequired(obj OrderReqItemsInner) error {
 	elements := map[string]interface{}{
 		"productId": obj.ProductId,
-		"quantity": obj.Quantity,
+		"quantity":  obj.Quantity,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {

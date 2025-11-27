@@ -11,8 +11,8 @@
 package openapi
 
 import (
-	"net/http"
 	"log"
+	"net/http"
 	"time"
 )
 

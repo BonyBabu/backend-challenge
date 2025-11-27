@@ -10,9 +10,6 @@
 
 package openapi
 
-
-
-
 // OrderReq - Place a new order
 type OrderReq struct {
 

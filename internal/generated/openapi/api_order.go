@@ -20,7 +20,7 @@ import (
 
 // OrderAPIController binds http requests to an api service and writes the service results to the http response
 type OrderAPIController struct {
-	service OrderAPIServicer
+	service      OrderAPIServicer
 	errorHandler ErrorHandler
 }
 
@@ -71,8 +71,6 @@ func (c *OrderAPIController) OrderedRoutes() []Route {
 		},
 	}
 }
-
-
 
 // PlaceOrder - Place an order
 func (c *OrderAPIController) PlaceOrder(w http.ResponseWriter, r *http.Request) {

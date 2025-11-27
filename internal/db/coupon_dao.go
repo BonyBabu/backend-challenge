@@ -9,13 +9,13 @@ import (
 	"sync/atomic"
 )
 
-type CouponDaoImpl struct {
+type couponDaoImpl struct {
 	files     []string
 	couponMin int
 }
 
 func NewCouponDao(files []string, couponMin int) CouponDao {
-	return &CouponDaoImpl{files: files, couponMin: couponMin}
+	return &couponDaoImpl{files: files, couponMin: couponMin}
 }
 
 type SearchResultImpl struct {
@@ -80,7 +80,7 @@ func searchForCoupon(filePath string, numberOfThreads int64, coupon string, stop
 }
 
 // SearchForCouponInGivenFiles implements CouponDao.
-func (c *CouponDaoImpl) SearchForCouponInGivenFiles(orderReq openapi.OrderReq) (SearchResult, error) {
+func (c *couponDaoImpl) SearchForCouponInGivenFiles(orderReq openapi.OrderReq) (SearchResult, error) {
 	stopAllchecks := make(chan bool, 1)
 	var results []*atomic.Bool
 	var fileProcessors []*sync.WaitGroup
@@ -95,4 +95,4 @@ func (c *CouponDaoImpl) SearchForCouponInGivenFiles(orderReq openapi.OrderReq) (
 	return &SearchResultImpl{results, fileProcessors, stopAllchecks, c.couponMin, false}, nil
 }
 
-var _ CouponDao = &CouponDaoImpl{}
+var _ CouponDao = &couponDaoImpl{}
