@@ -14,9 +14,9 @@ import (
 	"github.com/google/uuid"
 )
 
-// OrderAPIService is a service that implements the logic for the OrderAPIServicer
-// This service should implement the business logic for every endpoint for the OrderAPI API.
-// Include any external packages or services that will be required by this service.
+// OrderAPIService implements business logic for the OrderAPI defined by the generated OpenAPI.
+// It validates requests, resolves products and coupons, and persists orders via `db.OrderDao`.
+// Methods are wired in generated API router as an implementation of OrderAPIServicer.
 type OrderAPIService struct {
 	orderDao   db.OrderDao
 	productDao db.ProductDao

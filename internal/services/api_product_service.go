@@ -8,9 +8,9 @@ import (
 	"strconv"
 )
 
-// ProductAPIService is a service that implements the logic for the ProductAPIServicer
-// This service should implement the business logic for every endpoint for the ProductAPI API.
-// Include any external packages or services that will be required by this service.
+// ProductAPIService implements business logic for the ProductAPI defined by the generated OpenAPI.
+// It exposes product listing and lookup functionality using a `db.ProductDao`.
+// Methods are wired in generated API router as an implementation of ProductAPIServicer.
 type ProductAPIService struct {
 	productDao db.ProductDao
 }
